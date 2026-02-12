@@ -27,7 +27,7 @@ export default function LoginPage() {
 
     try {
       // 1️⃣ Create session
-      await account.createEmailPasswordSession(email, password);
+      await account.createEmailPasswordSession({ email, password });
 
       // 2️⃣ Reload user in AuthContext
       await reloadUser();

@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { databases, storage } from "@/Lib/appwrite";
+import { tablesDB, storage } from "@/Lib/appwrite";
 import { ID, Permission, Role } from "appwrite";
 import { useAuth } from "@/context/AuthContex";
 
@@ -18,7 +18,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 const DATABASE_ID = process.env.NEXT_PUBLIC_DATABASE_ID!;
 const TICKETS_COLLECTION_ID = process.env.NEXT_PUBLIC_TICKETS_COLLECTION_ID!;
 const BUCKET_ID = process.env.NEXT_PUBLIC_BUCKET_ID!;
-const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID!; // put your admin userId here
 
 export default function CreateTicket() {
   const router = useRouter();
@@ -64,11 +63,11 @@ export default function CreateTicket() {
         screenshotId = file.$id;
       }
 
-      // 2️⃣ Create ticket using object-style createDocument
-      await databases.createDocument({
+      // 2️⃣ Create ticket using tablesDB.createRow (replaces deprecated createDocument)
+      await tablesDB.createRow({
         databaseId: DATABASE_ID,
-        collectionId: TICKETS_COLLECTION_ID,
-        documentId: ID.unique(),
+        tableId: TICKETS_COLLECTION_ID,
+        rowId: ID.unique(),
         data: {
           title,
           description,
@@ -80,7 +79,6 @@ export default function CreateTicket() {
           Permission.read(Role.user(user.$id)),   // Owner can read
           Permission.update(Role.user(user.$id)), // Owner can update
           Permission.delete(Role.user(user.$id)), // Owner can delete
-          Permission.read(Role.user(ADMIN_ID)),   // Admin can read all tickets
         ],
       });
 

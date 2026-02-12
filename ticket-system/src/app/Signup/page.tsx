@@ -29,10 +29,10 @@ export default function Signup() {
         setError("");
 
         try {
-            await account.create(ID.unique(), email, password, name);
-            await account.createEmailPasswordSession(email,password);
-            await account.updatePrefs({ 
-                role: "admin" // or "user" based on your logic,
+            await account.create({ userId: ID.unique(), email, password, name });
+            await account.createEmailPasswordSession({ email, password });
+            await account.updatePrefs({
+                prefs: { role: "admin" }, // or "user" based on your logic
             });
             router.push("/dashboard");
         } catch (err: any) {
