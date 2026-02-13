@@ -20,20 +20,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // 1️⃣ Create session
+      // Create session
       await account.createEmailPasswordSession({ email, password });
 
-      // 2️⃣ Reload user in AuthContext
+      // Reload user in AuthContext
       await reloadUser();
 
-      // 3️⃣ Redirect to dashboard
-      router.push("/dashboard");
+      // Redirect to dashboard
+      const user = await account.get();
+
+      if (user.prefs.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
 
     } catch (err: any) {
       setError(err.message || "Invalid email or password");

@@ -23,7 +23,7 @@ export default function Signup() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleSignup = async (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setError("");
@@ -31,10 +31,23 @@ export default function Signup() {
         try {
             await account.create({ userId: ID.unique(), email, password, name });
             await account.createEmailPasswordSession({ email, password });
-            await account.updatePrefs({
-                prefs: { role: "admin" }, // or "user" based on your logic
+
+            // Decide role based on email
+            const role = email === "admin@gmail.com" ? "admin" : "user";
+
+            // Save role in preferences
+            await account.updatePreferences({
+                role: role,
             });
-            router.push("/dashboard");
+            
+            const user = await account.get();
+
+            if (user.prefs.role === "admin") {
+                router.push("/admin");
+            } else {
+                router.push("/dashboard");
+            }
+            
         } catch (err: any) {
             setError(err.message || "Failed to sign up.");
         } finally {
