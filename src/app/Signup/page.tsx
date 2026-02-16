@@ -40,10 +40,9 @@ export default function Signup() {
                 role: role,
             });
             
-            const user = await account.get();
-
-            if (user.prefs.role === "admin") {
-                router.push("/admin");
+            // Redirect based on email
+            if (email === "admin@gmail.com") {
+                router.push("/admin/dashboard");
             } else {
                 router.push("/dashboard");
             }

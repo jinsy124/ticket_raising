@@ -46,6 +46,13 @@ export default function Dashboard() {
     useEffect(() => {
         if (user) {
             fetchTickets();
+            
+            // Poll for updates every 5 seconds
+            const interval = setInterval(() => {
+                fetchTickets();
+            }, 5000);
+
+            return () => clearInterval(interval);
         }
     }, [user, isAdmin]);
 
@@ -98,38 +105,58 @@ export default function Dashboard() {
                         No tickets created yet.
                     </p>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {tickets.map((ticket) => (
-                            <Card key={ticket.$id} className="hover:shadow-lg transition">
-                                <CardHeader>
-                                    <CardTitle className="flex justify-between items-center text-lg">
-                                        <span className="truncate">{ticket.title}</span>
-                                        <Badge
-                                            variant={
-                                                ticket.status === "open"
-                                                    ? "default"
-                                                    : ticket.status === "in-progress"
-                                                    ? "secondary"
-                                                    : "destructive"
-                                            }
-                                        >
-                                            {ticket.status}
-                                        </Badge>
-                                    </CardTitle>
-                                </CardHeader>
+                     <div className="border rounded-lg overflow-hidden">
+                        {/* Table Header */}
+                        <div className="grid grid-cols-3 bg-muted p-3 font-semibold text-sm">
+                            <span>Title</span>
+                            <span>Status</span>
+                            <span className="text-right">Action</span>
+                        </div>
 
-                                <CardContent className="flex justify-between items-center">
+                        {/* Ticket Rows */}
+                        {tickets.map((ticket, index) => (
+                            <div
+                                key={ticket.$id}
+                                className={`grid grid-cols-3 items-center p-3 text-sm border-t hover:bg-muted/50 transition ${
+                                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                }`}
+                            >
+                                <span className="truncate">
+                                    {ticket.title}
+                                </span>
+
+                                <Badge
+                                    variant={
+                                        ticket.status === "open"
+                                            ? "default"
+                                            : ticket.status === "closed"
+                                            ? "destructive"
+                                            : "secondary"
+                                    }
+                                    className={
+                                        ticket.status === "in-progress"
+                                            ? "bg-green-600 hover:bg-green-700"
+                                            : ""
+                                    }
+                                >
+                                    {ticket.status}
+                                </Badge>
+
+                                <div className="text-right">
                                     <Button
                                         size="sm"
-                                        onClick={() => router.push(`/tickets/${ticket.$id}`)}
+                                        onClick={() =>
+                                            router.push(`/tickets/${ticket.$id}`)
+                                        }
                                     >
                                         View
                                     </Button>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
+                
             </div>
         </div>
     );

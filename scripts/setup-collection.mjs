@@ -25,6 +25,8 @@ const client = new Client();
 client.setEndpoint(ENDPOINT).setProject(PROJECT_ID).setKey(API_KEY);
 
 const databases = new Databases(client);
+console.log("Using Database ID:", DATABASE_ID);
+
 
 async function main() {
     console.log("🚀 Starting Appwrite collection setup...\n");
@@ -137,6 +139,101 @@ async function main() {
         `   NEXT_PUBLIC_TICKETS_COLLECTION_ID = "${COLLECTION_ID}"`
     );
     console.log("═".repeat(55) + "\n");
+
+        // ════════════════════════════════════════════════════════════
+    // 📨 Create "messages" collection
+    // ════════════════════════════════════════════════════════════
+
+    console.log("\n📦 Creating 'messages' collection...");
+
+    const messagesCollection = await databases.createCollection({
+        databaseId: DATABASE_ID,
+        collectionId: ID.unique(),
+        name: "messages",
+        permissions: [
+            Permission.create(Role.users()),
+            Permission.read(Role.users()),
+            Permission.update(Role.users()),
+            Permission.delete(Role.users()),
+        ],
+        documentSecurity: true,
+    });
+
+    const MESSAGES_COLLECTION_ID = messagesCollection.$id;
+    console.log(`   ✅ Messages collection created: ${MESSAGES_COLLECTION_ID}\n`);
+
+    console.log("🏗️  Creating message attributes...");
+
+    // ticketId - required (relation to tickets)
+    await databases.createStringAttribute({
+        databaseId: DATABASE_ID,
+        collectionId: MESSAGES_COLLECTION_ID,
+        key: "ticketId",
+        size: 100,
+        required: true,
+    });
+    console.log("   ✅ ticketId (string, required)");
+
+    // userId - required (who sent the message)
+    await databases.createStringAttribute({
+        databaseId: DATABASE_ID,
+        collectionId: MESSAGES_COLLECTION_ID,
+        key: "userId",
+        size: 100,
+        required: true,
+    });
+    console.log("   ✅ userId (string, required)");
+
+    // message - required text content
+    await databases.createStringAttribute({
+        databaseId: DATABASE_ID,
+        collectionId: MESSAGES_COLLECTION_ID,
+        key: "message",
+        size: 5000,
+        required: true,
+    });
+    console.log("   ✅ message (string, required, max 5000)");
+
+    // isInternal - optional boolean (for admin-only notes)
+    await databases.createBooleanAttribute({
+        databaseId: DATABASE_ID,
+        collectionId: MESSAGES_COLLECTION_ID,
+        key: "isInternal",
+        required: false,
+        xdefault: false,
+    });
+    console.log("   ✅ isInternal (boolean, default false)");
+
+    // ─── Wait for attributes ─────────────────────────────
+    console.log("\n⏳ Waiting for message attributes...");
+    await waitForAttributes(DATABASE_ID, MESSAGES_COLLECTION_ID);
+    console.log("   ✅ Message attributes ready!\n");
+
+    // ─── Create Indexes ───────────────────────────────────
+    console.log("📇 Creating message indexes...");
+
+    await databases.createIndex({
+        databaseId: DATABASE_ID,
+        collectionId: MESSAGES_COLLECTION_ID,
+        key: "idx_ticketId",
+        type: "key",
+        attributes: ["ticketId"],
+    });
+    console.log("   ✅ Index on ticketId");
+
+    await databases.createIndex({
+        databaseId: DATABASE_ID,
+        collectionId: MESSAGES_COLLECTION_ID,
+        key: "idx_userId",
+        type: "key",
+        attributes: ["userId"],
+    });
+    console.log("   ✅ Index on userId");
+
+    console.log("\n📋 New Messages Collection ID:");
+    console.log(`   NEXT_PUBLIC_MESSAGES_COLLECTION_ID = "${MESSAGES_COLLECTION_ID}"`);
+
+
 }
 
 /**

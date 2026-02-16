@@ -32,11 +32,9 @@ export default function LoginPage() {
       // Reload user in AuthContext
       await reloadUser();
 
-      // Redirect to dashboard
-      const user = await account.get();
-
-      if (user.prefs.role === "admin") {
-        router.push("/admin");
+      // Redirect based on email
+      if (email === "admin@gmail.com") {
+        router.push("/admin/dashboard");
       } else {
         router.push("/dashboard");
       }

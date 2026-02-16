@@ -26,9 +26,9 @@ export default function Navbar() {
 
   const navLinks = user
     ? [
-        { href: "/dashboard", label: "Dashboard" },
+        { href: isAdmin ? "/admin/dashboard" : "/dashboard", label: "Dashboard" },
         { href: "/tickets/create", label: "New Ticket" },
-        ...(isAdmin ? [{ href: "/admin", label: "Admin Panel" }] : []),
+        ...(isAdmin ? [{ href: "/admin", label: "Manage Tickets" }] : []),
       ]
     : [];
 
